@@ -70,14 +70,8 @@
       font-size: 15px;
       outline: none;
     }
-    .input-box:focus {
-      border-color: var(--primary);
-    }
-
-    .search-box {
-      background: var(--gray-bg);
-      border: 1px solid var(--border);
-    }
+    .input-box:focus { border-color: var(--primary); }
+    .search-box { background: var(--gray-bg); }
 
     .category-title {
       font-size: 16px;
@@ -113,15 +107,10 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .add-btn:active { background: var(--primary); color: #FFF; }
 
-    .no-result {
-      text-align: center;
-      color: var(--gray-text);
-      padding: 30px 0;
-      font-size: 14px;
-    }
+    .no-result { text-align: center; color: var(--gray-text); padding: 30px 0; font-size: 14px; }
 
+    /* 購物車底欄 */
     .cart-bar {
       position: fixed;
       bottom: 16px;
@@ -138,6 +127,7 @@
       align-items: center;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       z-index: 200;
+      cursor: pointer;
     }
     .cart-info { display: flex; align-items: center; gap: 12px; }
     .cart-badge {
@@ -159,6 +149,105 @@
       font-weight: 600;
       cursor: pointer;
     }
+
+    /* Modal 通用樣式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal-content {
+      width: 100%;
+      max-width: 480px;
+      background: #FFF;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 20px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 16px; font-weight: 700; color: var(--dark); }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-text); }
+
+    .modal-body { flex: 1; overflow-y: auto; padding: 12px 0; }
+
+    /* 客製化選單樣式 */
+    .option-group { margin-bottom: 16px; }
+    .option-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .option-select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      outline: none;
+      background: #FFF;
+    }
+
+    /* 冰熱選擇 Radio */
+    .radio-group { display: flex; gap: 12px; margin-top: 6px; }
+    .radio-label {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--gray-bg);
+    }
+    .radio-input { display: none; }
+    .radio-input:checked + .radio-label {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 14px; font-weight: 600; color: var(--dark); }
+    .cart-item-sub { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
+    .cart-item-price { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 12px; }
+
+    .qty-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--gray-bg);
+      font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center;
+    }
+
+    .modal-footer { padding-top: 12px; border-top: 1px solid var(--border); }
+    .submit-order-btn {
+      width: 100%; background: var(--primary); color: #FFF; border: none;
+      padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -177,22 +266,76 @@
       <input type="text" id="user-name" class="input-box" placeholder="例如：小明">
     </div>
 
-    <!-- 關鍵字搜尋列 -->
     <div class="input-group">
       <label class="input-label">搜尋餐點：</label>
       <input type="text" id="search-input" class="input-box search-box" placeholder="🔍 輸入關鍵字（如：牛排、燉飯、披薩）" oninput="filterMenu()">
     </div>
 
-    <!-- 全品項菜單區 -->
     <div id="menu-list"></div>
   </div>
 
-  <div class="cart-bar">
+  <div class="cart-bar" onclick="openCartModal()">
     <div class="cart-info">
       <span class="cart-badge" id="cart-count">0 項</span>
       <span class="cart-total" id="cart-total">小計 $0</span>
     </div>
-    <button class="checkout-btn" onclick="submitOrder()">送出訂單</button>
+    <button class="checkout-btn">檢視購物車</button>
+  </div>
+</div>
+
+<!-- 飲料客製化 Modal -->
+<div class="modal-overlay" id="bev-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="bev-modal-title">飲料調整</div>
+      <button class="close-btn" onclick="closeBevModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="option-group" id="temp-option-group">
+        <div class="option-title">溫度選擇：</div>
+        <div class="radio-group">
+          <input type="radio" name="bev-temp" id="temp-ice" value="冰" class="radio-input" checked>
+          <label for="temp-ice" class="radio-label">🧊 冰</label>
+          <input type="radio" name="bev-temp" id="temp-hot" value="熱" class="radio-input">
+          <label for="temp-hot" class="radio-label">🔥 熱</label>
+        </div>
+      </div>
+      <div class="option-group">
+        <div class="option-title">備註（如：少冰、去冰、微糖等）：</div>
+        <input type="text" id="bev-note" class="input-box" placeholder="選填，例如：去冰、微糖">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="submit-order-btn" onclick="confirmBevToCart()">加入購物車</button>
+    </div>
+  </div>
+</div>
+
+<!-- 套餐客製化選擇 Modal -->
+<div class="modal-overlay" id="set-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="set-title">選擇套餐內容</div>
+      <button class="close-btn" onclick="closeSetModal()">✕</button>
+    </div>
+    <div class="modal-body" id="set-options-body"></div>
+    <div class="modal-footer">
+      <button class="submit-order-btn" onclick="confirmSetToCart()">加入購物車</button>
+    </div>
+  </div>
+</div>
+
+<!-- 購物車 Modal -->
+<div class="modal-overlay" id="cart-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">🛒 已選餐點明細</div>
+      <button class="close-btn" onclick="closeCartModal()">✕</button>
+    </div>
+    <div class="modal-body" id="cart-items-list"></div>
+    <div class="modal-footer">
+      <button class="submit-order-btn" onclick="submitOrder()">確認並送出訂單</button>
+    </div>
   </div>
 </div>
 
@@ -203,12 +346,12 @@
     {
       category: "SET MENU 雙人套餐",
       items: [
-        { name: "雙人經典套餐", price: 1380 },
-        { name: "雙人主菜套餐 (人氣魔鬼風香料烤半雞)", price: 1580 },
-        { name: "雙人主菜套餐 (奶香白醬香煎鮭魚排)", price: 1680 },
-        { name: "雙人主菜套餐 (和風BBQ醬烤豬肋排)", price: 1680 },
-        { name: "雙人主菜套餐 (炭烤美國翼板牛排 300g)", price: 1780 },
-        { name: "雙人主菜套餐 (炭烤美國肋眼牛排 300g)", price: 1980 }
+        { name: "雙人經典套餐", price: 1380, isSet: true, setType: "classic" },
+        { name: "雙人主菜套餐 (人氣魔鬼風香料烤半雞)", price: 1580, isSet: true, setType: "main" },
+        { name: "雙人主菜套餐 (奶香白醬香煎鮭魚排)", price: 1680, isSet: true, setType: "main" },
+        { name: "雙人主菜套餐 (和風BBQ醬烤豬肋排)", price: 1680, isSet: true, setType: "main" },
+        { name: "雙人主菜套餐 (炭烤美國翼板牛排 300g)", price: 1780, isSet: true, setType: "main" },
+        { name: "雙人主菜套餐 (炭烤美國肋眼牛排 300g)", price: 1980, isSet: true, setType: "main" }
       ]
     },
     {
@@ -308,50 +451,42 @@
     {
       category: "BEVERAGE 飲品 & 無酒精特調",
       items: [
-        { name: "奇異果香蕉優格果昔", price: 160 },
-        { name: "草莓野莓果優格果昔", price: 200 },
-        { name: "鳳梨白桃優格果昔", price: 180 },
-        { name: "義大利咖啡 (冰/熱)", price: 120 },
-        { name: "義大利濃縮咖啡 (Single)", price: 120 },
-        { name: "義大利濃縮咖啡 (Double)", price: 130 },
-        { name: "拿鐵咖啡 (冰/熱)", price: 150 },
-        { name: "焦糖瑪奇朵 (冰/熱)", price: 150 },
-        { name: "可樂 / 雪碧 / 零卡可樂", price: 80 },
-        { name: "可爾必思 / 可爾必思蘇打", price: 80 },
-        { name: "100%新鮮繽紛檸檬漾", price: 120 },
-        { name: "覆盆子玫瑰烏龍茶 (熱)", price: 100 },
-        { name: "皇家宮廷伯爵茶 (熱)", price: 100 },
-        { name: "悠活舒緩茶 (熱/無咖啡因)", price: 100 },
-        { name: "檸檬鮮活冰綠茶", price: 120 },
-        { name: "熱帶鮮果冰紅茶", price: 120 },
-        { name: "黑糖鮮奶冰茶", price: 150 },
-        { name: "莫西多奇異興蘇打 (無酒精)", price: 220 },
-        { name: "野莓果薑汁惡魔 (無酒精)", price: 180 },
-        { name: "白桃迷迭瑪格麗特 (無酒精)", price: 200 }
-      ]
-    },
-    {
-      category: "ALCOHOL 啤酒 & 葡萄酒",
-      items: [
-        { name: "台灣金牌啤酒 330ml", price: 130 },
-        { name: "朝日啤酒 330ml", price: 130 },
-        { name: "義大利莫雷帝啤酒 330ml", price: 130 },
-        { name: "Gancia Asti 氣泡酒 (375ml)", price: 550 },
-        { name: "Gancia Asti 氣泡酒 (750ml)", price: 980 },
-        { name: "Estrella Frizzante (杯)", price: 150 },
-        { name: "Estrella Frizzante (750ml)", price: 680 },
-        { name: "Montes Classic Chardonnay (750ml)", price: 980 },
-        { name: "Templum Tempranillo (杯)", price: 150 },
-        { name: "Templum Tempranillo (750ml)", price: 680 },
-        { name: "Piccini Memoro (375ml)", price: 550 },
-        { name: "Piccini Memoro (750ml)", price: 980 }
+        { name: "奇異果香蕉優格果昔", price: 160, isBev: true, hasHot: false },
+        { name: "草莓野莓果優格果昔", price: 200, isBev: true, hasHot: false },
+        { name: "鳳梨白桃優格果昔", price: 180, isBev: true, hasHot: false },
+        { name: "義大利咖啡", price: 120, isBev: true, hasHot: true },
+        { name: "義大利濃縮咖啡 (Single)", price: 120, isBev: true, hasHot: true },
+        { name: "義大利濃縮咖啡 (Double)", price: 130, isBev: true, hasHot: true },
+        { name: "拿鐵咖啡", price: 150, isBev: true, hasHot: true },
+        { name: "焦糖瑪奇朵", price: 150, isBev: true, hasHot: true },
+        { name: "可樂 / 雪碧 / 零卡可樂", price: 80, isBev: true, hasHot: false },
+        { name: "可爾必思 / 可爾必思蘇打", price: 80, isBev: true, hasHot: false },
+        { name: "100%新鮮繽紛檸檬漾", price: 120, isBev: true, hasHot: false },
+        { name: "覆盆子玫瑰烏龍茶", price: 100, isBev: true, hasHot: true },
+        { name: "皇家宮廷伯爵茶", price: 100, isBev: true, hasHot: true },
+        { name: "悠活舒緩茶 (無咖啡因)", price: 100, isBev: true, hasHot: true },
+        { name: "檸檬鮮活冰綠茶", price: 120, isBev: true, hasHot: false },
+        { name: "熱帶鮮果冰紅茶", price: 120, isBev: true, hasHot: false },
+        { name: "黑糖鮮奶冰茶", price: 150, isBev: true, hasHot: false },
+        { name: "莫西多奇異興蘇打 (無酒精)", price: 220, isBev: true, hasHot: false },
+        { name: "野莓果薑汁惡魔 (無酒精)", price: 180, isBev: true, hasHot: false },
+        { name: "白桃迷迭瑪格麗特 (無酒精)", price: 200, isBev: true, hasHot: false }
       ]
     }
   ];
 
-  let cart = [];
+  const setOptionsList = {
+    salad: ["Bellini經典凱薩沙拉", "義式炭烤時蔬菜溫沙拉"],
+    appetizer: ["馬德里香料燉牛肚", "蒜香辣炒野菇時蔬鮮蝦", "義式酒香炒野菇甘藍", "香酥唐揚雞翅佐辣茄汁", "凱薩風香辣酥炸軟絲", "酥炸薯條佐松露醬", "鄉村辣味牛肉醬口袋餅", "和風照燒烤雞腿鮮蔬"],
+    pizza: ["瑪格麗特香茄起司比薩", "風乾火腿主廚總匯比薩", "BBQ醬雞肉鳳梨起司比薩", "明太子軟絲鮪魚起司比薩", "羅勒青醬鮮蝦野菇起司比薩", "綜合華菇黑松露起司比薩", "經典四種起司比薩", "香烤牛肉蒜辣起司比薩", "特選雙拼比薩"],
+    pasta: ["經典波隆那肉醬溫泉蛋起司麵", "東京風蒜辣牛蒡雞肉麵", "香辣完熟番茄鮮蝦麵", "BBQ豬肋排培根番茄麵", "和風柚子軟絲明太子麵", "漁夫風綜合海鮮番茄麵", "羅勒鮮蝦野菇奶油起司麵", "職人風奶油蛋黃培根麵", "燻鮭野菇曙光醬起司麵", "義式家鄉番茄蔬食麵", "茄丁軟絲圈墨魚汁麵", "焗烤肉醬千層麵", "蔥香蒜味淡菜蛤蜊麵"],
+    beverage: ["義大利咖啡 (冰)", "義大利咖啡 (熱)", "拿鐵咖啡 (冰)", "拿鐵咖啡 (熱)", "焦糖瑪奇朵 (冰)", "焦糖瑪奇朵 (熱)", "可樂", "雪碧", "零卡可樂", "可爾必思", "100%新鮮繽紛檸檬漾", "覆盆子玫瑰烏龍茶 (熱)", "皇家宮廷伯爵茶 (熱)", "悠活舒緩茶 (熱)", "檸檬鮮活冰綠茶", "熱帶鮮果冰紅茶", "黑糖鮮奶冰茶"]
+  };
 
-  // 渲染菜單列表（支援關鍵字過濾）
+  let cart = [];
+  let currentEditingSet = null;
+  let currentEditingBev = null;
+
   function filterMenu() {
     const keyword = document.getElementById('search-input').value.trim().toLowerCase();
     const container = document.getElementById('menu-list');
@@ -360,7 +495,6 @@
     let hasResult = false;
 
     fullMenu.forEach(cat => {
-      // 篩選出符合關鍵字的餐點
       const matchedItems = cat.items.filter(item => 
         item.name.toLowerCase().includes(keyword)
       );
@@ -375,12 +509,24 @@
         matchedItems.forEach(item => {
           const card = document.createElement('div');
           card.className = 'food-card';
+          
+          let btnOnClick = `addToCart('${item.name}', ${item.price})`;
+          let btnText = '+ 加點';
+
+          if (item.isSet) {
+            btnOnClick = `openSetModal('${item.name}', ${item.price}, '${item.setType}')`;
+            btnText = '選擇套餐內容';
+          } else if (item.isBev) {
+            btnOnClick = `openBevModal('${item.name}', ${item.price}, ${item.hasHot})`;
+            btnText = '選擇冰熱/備註';
+          }
+
           card.innerHTML = `
             <div class="food-info">
               <div class="food-name">${item.name}</div>
               <div class="food-price">$${item.price}</div>
             </div>
-            <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
+            <button class="add-btn" onclick="${btnOnClick}">${btnText}</button>
           `;
           container.appendChild(card);
         });
@@ -392,15 +538,166 @@
     }
   }
 
-  function addToCart(name, price) {
-    cart.push({ name, price });
+  // 飲料彈窗
+  function openBevModal(name, price, hasHot) {
+    currentEditingBev = { name, price };
+    document.getElementById('bev-modal-title').innerText = name;
+    document.getElementById('bev-note').value = '';
+
+    const tempGroup = document.getElementById('temp-option-group');
+    if (!hasHot) {
+      tempGroup.style.display = 'none';
+    } else {
+      tempGroup.style.display = 'block';
+      document.getElementById('temp-ice').checked = true;
+    }
+
+    document.getElementById('bev-modal').classList.add('active');
+  }
+
+  function closeBevModal() {
+    document.getElementById('bev-modal').classList.remove('active');
+  }
+
+  function confirmBevToCart() {
+    const note = document.getElementById('bev-note').value.trim();
+    const tempGroupVisible = document.getElementById('temp-option-group').style.display !== 'none';
+    
+    let subTextList = [];
+    if (tempGroupVisible) {
+      const temp = document.querySelector('input[name="bev-temp"]:checked').value;
+      subTextList.push(`溫度: ${temp}`);
+    }
+    if (note) {
+      subTextList.push(`備註: ${note}`);
+    }
+
+    cart.push({
+      id: Date.now(),
+      name: currentEditingBev.name,
+      price: currentEditingBev.price,
+      subText: subTextList.join(' | ')
+    });
+
+    closeBevModal();
     updateCartUI();
+  }
+
+  // 套餐彈窗
+  function openSetModal(name, price, setType) {
+    currentEditingSet = { name, price, setType };
+    document.getElementById('set-title').innerText = name;
+    
+    const body = document.getElementById('set-options-body');
+    body.innerHTML = '';
+
+    const buildSelect = (label, id, options) => {
+      let html = `<div class="option-group"><div class="option-title">${label}</div><select id="${id}" class="option-select">`;
+      options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+      html += `</select></div>`;
+      return html;
+    };
+
+    let formHTML = '';
+    formHTML += buildSelect('1. 沙拉 (任選 1)', 'set-salad', setOptionsList.salad);
+    formHTML += buildSelect('2. 開胃菜 ($300內任選 1)', 'set-appetizer', setOptionsList.appetizer);
+
+    if (setType === 'classic') {
+      formHTML += buildSelect('3. 比薩 ($420內任選 1)', 'set-pizza', setOptionsList.pizza);
+    }
+
+    formHTML += buildSelect(setType === 'classic' ? '4. 義大利麵 ($300內任選 1)' : '3. 義大利麵 ($300內任選 1)', 'set-pasta', setOptionsList.pasta);
+    formHTML += buildSelect('飲料 1 ($120內任選 1)', 'set-bev1', setOptionsList.beverage);
+    formHTML += buildSelect('飲料 2 ($120內任選 1)', 'set-bev2', setOptionsList.beverage);
+
+    body.innerHTML = formHTML;
+    document.getElementById('set-modal').classList.add('active');
+  }
+
+  function closeSetModal() {
+    document.getElementById('set-modal').classList.remove('active');
+  }
+
+  function confirmSetToCart() {
+    const salad = document.getElementById('set-salad').value;
+    const appetizer = document.getElementById('set-appetizer').value;
+    const pasta = document.getElementById('set-pasta').value;
+    const bev1 = document.getElementById('set-bev1').value;
+    const bev2 = document.getElementById('set-bev2').value;
+
+    let subItems = [`沙拉: ${salad}`, `開胃菜: ${appetizer}`];
+    
+    if (currentEditingSet.setType === 'classic') {
+      const pizza = document.getElementById('set-pizza').value;
+      subItems.push(`披薩: ${pizza}`);
+    }
+    
+    subItems.push(`義大利麵: ${pasta}`, `飲料: ${bev1}, ${bev2}`);
+
+    cart.push({
+      id: Date.now(),
+      name: currentEditingSet.name,
+      price: currentEditingSet.price,
+      subText: subItems.join(' | ')
+    });
+
+    closeSetModal();
+    updateCartUI();
+  }
+
+  function addToCart(name, price) {
+    cart.push({
+      id: Date.now(),
+      name: name,
+      price: price,
+      subText: ''
+    });
+    updateCartUI();
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartUI();
+    renderCartModalItems();
   }
 
   function updateCartUI() {
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     document.getElementById('cart-count').innerText = `${cart.length} 項`;
     document.getElementById('cart-total').innerText = `小計 $${total}`;
+  }
+
+  function openCartModal() {
+    renderCartModalItems();
+    document.getElementById('cart-modal').classList.add('active');
+  }
+
+  function closeCartModal() {
+    document.getElementById('cart-modal').classList.remove('active');
+  }
+
+  function renderCartModalItems() {
+    const listContainer = document.getElementById('cart-items-list');
+    listContainer.innerHTML = '';
+
+    if (cart.length === 0) {
+      listContainer.innerHTML = '<div class="no-result">購物車目前是空的！</div>';
+      return;
+    }
+
+    cart.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+      row.innerHTML = `
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          ${item.subText ? `<div class="cart-item-sub">${item.subText}</div>` : ''}
+        </div>
+        <div class="cart-item-price">$${item.price}</div>
+        <button class="qty-btn" onclick="removeFromCart(${index})">✕</button>
+      `;
+      listContainer.appendChild(row);
+    });
   }
 
   function submitOrder() {
@@ -415,14 +712,19 @@
     }
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    
+
+    const formattedItems = cart.map(item => ({
+      name: item.subText ? `${item.name} (${item.subText})` : item.name,
+      price: item.price
+    }));
+
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userName: userName,
-        items: cart,
+        items: formattedItems,
         totalAmount: total,
         timestamp: new Date().toISOString()
       })
@@ -432,11 +734,11 @@
       cart = [];
       document.getElementById('user-name').value = '';
       updateCartUI();
+      closeCartModal();
     })
     .catch(() => alert('送出失敗，請重試'));
   }
 
-  // 初始化菜單
   filterMenu();
 </script>
 
