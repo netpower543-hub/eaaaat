@@ -136,31 +136,37 @@
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw10CiiE_yatTCrTa_1yjiQRzlkIJCedkWhoEzhsDk3qIwgaUiuaotiCZsKYRxNpj88Rg/exec';
   let cart = [];
 
-  // 自動從你的 Google Apps Script 載入菜單
-  fetch(SCRIPT_URL)
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById('menu-container');
-      container.innerHTML = '';
-      
-      // 假設你的 API 回傳 array: [{name: "品項", price: 100}, ...]
-      data.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'food-card';
-        card.innerHTML = `
-          <div>
-            <div class="food-name">${item.name}</div>
-            <div class="food-price">$${item.price}</div>
-          </div>
-          <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
-        `;
-        container.appendChild(card);
-      });
-    })
-    .catch(err => {
-      // 若後端僅支援 POST，顯示點餐提示
-      document.getElementById('menu-container').innerHTML = '<div class="loading-text">請選擇餐點進行結帳</div>';
+  // 處理 JSONP 回傳的菜單資料
+  function renderMenu(data) {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = '';
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="loading-text">暫無菜單資料</div>';
+      return;
+    }
+
+    data.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'food-card';
+      card.innerHTML = `
+        <div>
+          <div class="food-name">${item.name}</div>
+          <div class="food-price">$${item.price}</div>
+        </div>
+        <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
+      `;
+      container.appendChild(card);
     });
+  }
+
+  // 使用 JSONP 動態載入菜單，避開跨域限制
+  const script = document.createElement('script');
+  script.src = `${SCRIPT_URL}?prefix=renderMenu`;
+  script.onerror = function() {
+    document.getElementById('menu-container').innerHTML = '<div class="loading-text">菜單載入失敗，請重新整理頁面</div>';
+  };
+  document.body.appendChild(script);
 
   function addToCart(name, price) {
     cart.push({ name, price });
