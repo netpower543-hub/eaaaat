@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BELLINI Pasta Pasta 團體聚會點餐單</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 20px 12px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 540px;
+      background: #ffffff;
+      padding: 28px 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .header-banner {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      color: #b8282e;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .alert-box {
+      background: #fff8e6;
+      border: 1px solid #ffe58f;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #8a5d00;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .menu-preview {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .menu-preview img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid #eee;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .menu-preview img:hover {
+      transform: scale(1.01);
+    }
+    .menu-preview p {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label.field-label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #222;
+    }
+    .required {
+      color: #e53e3e;
+      margin-left: 3px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      background-color: #fafafa;
+      transition: border-color 0.2s, background-color 0.2s;
+      outline: none;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: #b8282e;
+      background-color: #fff;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fafafa;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #edf2f7;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #b8282e;
+      margin-right: 8px;
+    }
+    .checkbox-label-text {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    .price-tag {
+      font-weight: 600;
+      color: #666;
+      font-size: 13px;
+    }
+    .summary-card {
+      margin-top: 24px;
+      padding: 16px;
+      background: #fdf2f2;
+      border-radius: 12px;
+      border: 1px solid #f8d7da;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #222;
+    }
+    .total-amount {
+      font-size: 22px;
+      color: #b8282e;
+    }
+    .warn-msg {
+      color: #e53e3e;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 6px;
+      display: none;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #b8282e;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(184, 40, 46, 0.3);
+      transition: background 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover {
+      background: #961e23;
+    }
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-banner">
+    <h1>BELLINI Pasta Pasta 點餐調查</h1>
+    <div class="subtitle">團體聚會餐點預先統計</div>
+  </div>
+
+  <div class="alert-box">
+    📌 <strong>提醒事項</strong>：<br>
+    • 餐廳最低消費為每人 <strong>$300 元</strong>。<br>
+    • 請預先選擇餐點以利餐廳準備。
+  </div>
+
+  <!-- 菜單圖片區塊 -->
+  <div class="menu-preview">
+    <a href="https://www.bellinipasta.com.tw/bellini-pasta/events?event_id=66" target="_blank" title="點擊查看官方完整菜單">
+      <img src="https://www.bellinipasta.com.tw/upload/event_b/202303241512411.jpg" alt="BELLINI Pasta Pasta 官方菜單">
+    </a>
+    <p>💡 點擊上方圖片可開啟官方高解析度菜單</p>
+  </div>
+
+  <form id="orderForm">
+    <!-- 暱稱 -->
+    <div class="form-group">
+      <label class="field-label" for="nickname">您的暱稱 <span class="required">*</span></label>
+      <input type="text" id="nickname" required placeholder="請填寫大家認識的名字或暱稱">
+    </div>
+
+    <!-- 主餐 -->
+    <div class="form-group">
+      <label class="field-label" for="mainMeal">主餐選擇 <span class="required">*</span></label>
+      <select id="mainMeal" required onchange="updateTotal()">
+        <option value="" data-price="0">-- 請選擇主餐 --</option>
+        <option value="經典波隆那肉醬起司麵" data-price="290">經典波隆那肉醬起司麵 ($290)</option>
+        <option value="東京風蒜辣牛蒡雞肉麵" data-price="310">東京風蒜辣牛蒡雞肉麵 ($310)</option>
+        <option value="蔥香蒜味淡菜蛤蜊麵" data-price="310">蔥香蒜味淡菜蛤蜊麵 ($310)</option>
+        <option value="和風柚子軟絲明太子麵" data-price="310">和風柚子軟絲明太子麵 ($310)</option>
+        <option value="燻鮭野菇曙光醬起司麵" data-price="330">燻鮭野菇曙光醬起司麵 ($330)</option>
+        <option value="羅勒鮮蝦野菇奶油起司麵" data-price="330">羅勒鮮蝦野菇奶油起司麵 ($330)</option>
+        <option value="照燒醬烤雞野菇起司燉飯" data-price="370">照燒醬烤雞野菇起司燉飯 ($370)</option>
+        <option value="瑪格麗特番茄起司比薩" data-price="370">瑪格麗特番茄起司比薩 ($370)</option>
+        <option value="漁夫風綜合海鮮番茄麵" data-price="390">漁夫風綜合海鮮番茄麵 ($390)</option>
+        <option value="焗烤肉醬千層麵" data-price="390">焗烤肉醬千層麵 ($390)</option>
+        <option value="特選雙拼比薩" data-price="450">特選雙拼比薩 ($450)</option>
+      </select>
+    </div>
+
+    <!-- 附餐 / 加點 -->
+    <div class="form-group">
+      <label class="field-label">附餐 / 加點項目（可多選）</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <span class="checkbox-label-text">
+            <input type="checkbox" class="side-item" value="義式番茄野菜培根湯" data-price="140" onchange="updateTotal()">
+            義式番茄野菜培根湯
+          </span>
+          <span class="price-tag">$140</span>
+        </label>
+        <label class="checkbox-item">
+          <span class="checkbox-label-text">
+            <input type="checkbox" class="side-item" value="奶油玉米湯" data-price="140" onchange="updateTotal()">
+            奶油玉米湯
+          </span>
+          <span class="price-tag">$140</span>
+        </label>
+        <label class="checkbox-item">
+          <span class="checkbox-label-text">
+            <input type="checkbox" class="side-item" value="超人氣香蒜奶酥麵包" data-price="150" onchange="updateTotal()">
+            超人氣香蒜奶酥麵包
+          </span>
+          <span class="price-tag">$150</span>
+        </label>
+        <label class="checkbox-item">
+          <span class="checkbox-label-text">
+            <input type="checkbox" class="side-item" value="香酥唐揚雞翅佐辣茄汁" data-price="290" onchange="updateTotal()">
+            香酥唐揚雞翅佐辣茄汁
+          </span>
+          <span class="price-tag">$290</span>
+        </label>
+        <label class="checkbox-item">
+          <span class="checkbox-label-text">
+            <input type="checkbox" class="side-item" value="蒜香辣炒野菇時蔬鮮蝦" data-price="330" onchange="updateTotal()">
+            蒜香辣炒野菇時蔬鮮蝦
+          </span>
+          <span class="price-tag">$330</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 備註欄位 -->
+    <div class="form-group">
+      <label class="field-label" for="note">備註 / 特殊需求</label>
+      <textarea id="note" rows="3" placeholder="例如：不吃辣、過敏原需求、或欲與他人共餐等..."></textarea>
+    </div>
+
+    <!-- 金額試算與低消提醒 -->
+    <div class="summary-card">
+      <div class="total-row">
+        <span>預估餐點總額：</span>
+        <span>$<span id="totalPrice" class="total-amount">0</span></span>
+      </div>
+      <div id="warnMsg" class="warn-msg">⚠️ 目前金額未達個人最低消費 $300 元</div>
+    </div>
+
+    <button type="submit" class="submit-btn">確認送出點餐資訊</button>
+  </form>
+</div>
+
+<script>
+  function updateTotal() {
+    const mainSelect = document.getElementById('mainMeal');
+    const selectedOption = mainSelect.options[mainSelect.selectedIndex];
+    let total = parseInt(selectedOption.getAttribute('data-price') || 0);
+
+    const sideCheckboxes = document.querySelectorAll('.side-item:checked');
+    sideCheckboxes.forEach(cb => {
+      total += parseInt(cb.getAttribute('data-price') || 0);
+    });
+
+    document.getElementById('totalPrice').innerText = total;
+
+    const warnMsg = document.getElementById('warnMsg');
+    if (total > 0 && total < 300) {
+      warnMsg.style.display = 'block';
+    } else {
+      warnMsg.style.display = 'none';
+    }
+    return total;
+  }
+
+  document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nickname = document.getElementById('nickname').value.trim();
+    const mainMeal = document.getElementById('mainMeal').value;
+    const total = updateTotal();
+    const note = document.getElementById('note').value.trim();
+
+    const sides = Array.from(document.querySelectorAll('.side-item:checked')).map(cb => cb.value);
+
+    let orderSummary = `【點餐結果確認】\n`;
+    orderSummary += `• 暱稱：${nickname}\n`;
+    orderSummary += `• 主餐：${mainMeal}\n`;
+    orderSummary += `• 附餐/加點：${sides.length > 0 ? sides.join(', ') : '無'}\n`;
+    orderSummary += `• 預估總額：$${total} 元\n`;
+    orderSummary += `• 備註需求：${note || '無'}`;
+
+    if (total < 300) {
+      if (!confirm(`您目前的餐點總額為 $${total} 元，低於每人低消 $300 元。是否確定仍要送出？`)) {
+        return;
+      }
+    }
+
+    alert("🎉 點餐已成功記錄！\n\n" + orderSummary);
+  });
+</script>
+
+</body>
+</html>
