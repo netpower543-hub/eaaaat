@@ -47,7 +47,7 @@
     .store-name { font-size: 18px; font-weight: 700; color: var(--dark); }
 
     .menu-section { padding: 16px; flex: 1; }
-    .loading-text { text-align: center; color: var(--gray-text); margin-top: 40px; font-size: 15px; }
+    .category-title { font-size: 15px; font-weight: 700; color: var(--primary); margin: 16px 0 8px; }
 
     .food-card {
       display: flex;
@@ -56,11 +56,12 @@
       padding: 14px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       background: #FFF;
     }
-    .food-name { font-size: 16px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
-    .food-price { font-size: 15px; font-weight: 700; color: var(--primary); }
+    .food-info { flex: 1; padding-right: 12px; }
+    .food-name { font-size: 15px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+    .food-price { font-size: 14px; font-weight: 700; color: var(--primary); }
     
     .add-btn {
       background: var(--primary);
@@ -71,7 +72,9 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
     }
+    .add-btn:active { transform: scale(0.95); }
 
     .cart-bar {
       position: fixed;
@@ -116,11 +119,58 @@
 
 <div class="mobile-container">
   <div class="header">
-    <div class="store-name">線上點餐</div>
+    <div class="store-name">線上點餐機</div>
   </div>
 
   <div class="menu-section" id="menu-container">
-    <div class="loading-text">載入菜單中...</div>
+    <!-- 菜單列表 -->
+    <div class="category-title">🍝 義大利麵 / 燉飯</div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">經典波隆那肉醬起司麵</div>
+        <div class="food-price">$320</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('經典波隆那肉醬起司麵', 320)">+ 加點</button>
+    </div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">東京風蒜辣牛蒡雞肉麵</div>
+        <div class="food-price">$340</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('東京風蒜辣牛蒡雞肉麵', 340)">+ 加點</button>
+    </div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">照燒醬烤雞野菇起司燉飯</div>
+        <div class="food-price">$360</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('照燒醬烤雞野菇起司燉飯', 360)">+ 加點</button>
+    </div>
+
+    <div class="category-title">🍕 手工比薩</div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">夏威夷鮮蝦比薩</div>
+        <div class="food-price">$380</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('夏威夷鮮蝦比薩', 380)">+ 加點</button>
+    </div>
+
+    <div class="category-title">🥗 開胃菜與飲品</div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">經典凱薩沙拉</div>
+        <div class="food-price">$220</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('經典凱薩沙拉', 220)">+ 加點</button>
+    </div>
+    <div class="food-card">
+      <div class="food-info">
+        <div class="food-name">特選冰紅茶</div>
+        <div class="food-price">$90</div>
+      </div>
+      <button class="add-btn" onclick="addToCart('特選冰紅茶', 90)">+ 加點</button>
+    </div>
   </div>
 
   <div class="cart-bar">
@@ -135,38 +185,6 @@
 <script>
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw10CiiE_yatTCrTa_1yjiQRzlkIJCedkWhoEzhsDk3qIwgaUiuaotiCZsKYRxNpj88Rg/exec';
   let cart = [];
-
-  // 處理 JSONP 回傳的菜單資料
-  function renderMenu(data) {
-    const container = document.getElementById('menu-container');
-    container.innerHTML = '';
-    
-    if (!data || data.length === 0) {
-      container.innerHTML = '<div class="loading-text">暫無菜單資料</div>';
-      return;
-    }
-
-    data.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'food-card';
-      card.innerHTML = `
-        <div>
-          <div class="food-name">${item.name}</div>
-          <div class="food-price">$${item.price}</div>
-        </div>
-        <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
-      `;
-      container.appendChild(card);
-    });
-  }
-
-  // 使用 JSONP 動態載入菜單，避開跨域限制
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?prefix=renderMenu`;
-  script.onerror = function() {
-    document.getElementById('menu-container').innerHTML = '<div class="loading-text">菜單載入失敗，請重新整理頁面</div>';
-  };
-  document.body.appendChild(script);
 
   function addToCart(name, price) {
     cart.push({ name, price });
@@ -194,7 +212,7 @@
       body: JSON.stringify({ items: cart, totalAmount: total, timestamp: new Date().toISOString() })
     })
     .then(() => {
-      alert('訂單已送出！');
+      alert('訂單已成功送出！');
       cart = [];
       updateCartUI();
     })
