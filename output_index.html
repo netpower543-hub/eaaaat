@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上點餐系統 (含 Google 試算表同步功能)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .category-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .category-desc {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 2px 8px rgba(230, 126, 34, 0.15);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-info input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        .item-price {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .summary-card {
+            background: #fff;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            position: sticky;
+            bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .summary-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .note-text {
+            color: #888;
+            font-size: 12px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #d35400;
+        }
+
+        .selected-list {
+            margin-top: 10px;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #555;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .gas-config {
+            background: #eef2f5;
+            border: 1px dashed #b0bec5;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>線上多選點餐系統</h1>
+        <div class="subtitle">可複選多項主食與附餐，金額自動計算並儲存至 Google 試算表</div>
+    </header>
+
+    <form id="orderForm">
+        <!-- 顧客資訊 -->
+        <div class="form-group">
+            <label for="userName">填寫人姓名 / 訂位稱呼 *</label>
+            <input type="text" id="userName" name="userName" placeholder="請輸入姓名" required>
+        </div>
+
+        <!-- 試算表 API 設定 (方便測試) -->
+        <div class="gas-config">
+            <label for="scriptUrl">Google Apps Script Web App URL (連動試算表網址)</label>
+            <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+            <div style="color: #666; font-size: 11px; margin-top: 4px;">* 請在此貼上部署好的 Apps Script 網址，系統將會將點餐紀錄送至您的 Google 試算表。</div>
+        </div>
+
+        <!-- 分類 1: 主食類 (可多選) -->
+        <div class="category-title">
+            <span>主食類 (可多選)</span>
+            <span class="category-desc">可任意複選搭配</span>
+        </div>
+        <div class="menu-grid">
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="日式咖哩牛肉飯" data-price="220">
+                    <span class="item-name">日式咖哩牛肉飯</span>
+                </div>
+                <span class="item-price">$220</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="奶油海鮮義大利麵" data-price="250">
+                    <span class="item-name">奶油海鮮義大利麵</span>
+                </div>
+                <span class="item-price">$250</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="經典台港排骨飯" data-price="180">
+                    <span class="item-name">經典台港排骨飯</span>
+                </div>
+                <span class="item-price">$180</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="舒肥雞胸沙拉盆" data-price="190">
+                    <span class="item-name">舒肥雞胸沙拉盆</span>
+                </div>
+                <span class="item-price">$190</span>
+            </label>
+        </div>
+
+        <!-- 分類 2: 小吃與副食 (可多選) -->
+        <div class="category-title">
+            <span>點心與單點 (可多選)</span>
+            <span class="category-desc">美味副餐配菜</span>
+        </div>
+        <div class="menu-grid">
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="美式黃金薯條" data-price="60">
+                    <span class="item-name">美式黃金薯條</span>
+                </div>
+                <span class="item-price">$60</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="唐揚炸雞 (5塊)" data-price="100">
+                    <span class="item-name">唐揚炸雞 (5塊)</span>
+                </div>
+                <span class="item-price">$100</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="主廚每日濃湯" data-price="50">
+                    <span class="item-name">主廚每日濃湯</span>
+                </div>
+                <span class="item-price">$50</span>
+            </label>
+        </div>
+
+        <!-- 分類 3: 飲品與甜點 (可多選) -->
+        <div class="category-title">
+            <span>飲品與甜點 (可多選)</span>
+            <span class="category-desc">餐後飲料甜點</span>
+        </div>
+        <div class="menu-grid">
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="錫蘭紅茶 (冰/熱)" data-price="40">
+                    <span class="item-name">錫蘭紅茶</span>
+                </div>
+                <span class="item-price">$40</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="美式黑咖啡" data-price="60">
+                    <span class="item-name">美式黑咖啡</span>
+                </div>
+                <span class="item-price">$60</span>
+            </label>
+            <label class="menu-item">
+                <div class="item-info">
+                    <input type="checkbox" class="item-checkbox" data-name="手工焦糖烤布蕾" data-price="70">
+                    <span class="item-name">手工焦糖烤布蕾</span>
+                </div>
+                <span class="item-price">$70</span>
+            </label>
+        </div>
+
+        <!-- 試算總額卡片 -->
+        <div class="summary-card">
+            <h3>試算結帳金額</h3>
+            <ul id="selectedList" class="selected-list">
+                <li>尚未選擇任何餐點</li>
+            </ul>
+            <div style="margin-top: 15px;">
+                <div class="summary-row">
+                    <span>餐點小計：</span>
+                    <span id="subtotalAmount">$0</span>
+                </div>
+                <div class="summary-row">
+                    <span>預估 10% 服務費：</span>
+                    <span id="serviceFeeAmount">$0</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>預估總計金額：</span>
+                    <span id="totalAmount">$0</span>
+                </div>
+            </div>
+            
+            <div class="note-text">
+                * 註解：以上計算結果僅供參考，實際結帳金額可能因現場活動優惠、特殊客製化需求或內用 10% 服務費而有所差異。
+            </div>
+
+            <button type="submit" class="btn-submit">確認送出並同步至 Google 試算表</button>
+        </div>
+    </form>
+
+    <script>
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const subtotalElem = document.getElementById('subtotalAmount');
+        const serviceFeeElem = document.getElementById('serviceFeeAmount');
+        const totalElem = document.getElementById('totalAmount');
+        const selectedListElem = document.getElementById('selectedList');
+        const orderForm = document.getElementById('orderForm');
+
+        function updateCalculation() {
+            let subtotal = 0;
+            let selectedItems = [];
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const name = cb.getAttribute('data-name');
+                    const price = parseInt(cb.getAttribute('data-price'), 10);
+                    subtotal += price;
+                    selectedItems.push(`${name} ($${price})`);
+                }
+            });
+
+            const serviceFee = Math.round(subtotal * 0.1);
+            const total = subtotal + serviceFee;
+
+            subtotalElem.textContent = `$${subtotal}`;
+            serviceFeeElem.textContent = `$${serviceFee}`;
+            totalElem.textContent = `$${total}`;
+
+            // 更新已選清單
+            selectedListElem.innerHTML = '';
+            if (selectedItems.length === 0) {
+                selectedListElem.innerHTML = '<li>尚未選擇任何餐點</li>';
+            } else {
+                selectedItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    selectedListElem.appendChild(li);
+                });
+            }
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateCalculation);
+        });
+
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('userName').value;
+            const scriptUrl = document.getElementById('scriptUrl').value;
+
+            let selectedItems = [];
+            let subtotal = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const itemName = cb.getAttribute('data-name');
+                    const price = parseInt(cb.getAttribute('data-price'), 10);
+                    selectedItems.push(itemName);
+                    subtotal += price;
+                }
+            });
+
+            if (selectedItems.length === 0) {
+                alert('請至少選擇一項餐點！');
+                return;
+            }
+
+            const serviceFee = Math.round(subtotal * 0.1);
+            const total = subtotal + serviceFee;
+
+            const payload = {
+                timestamp: new Date().toLocaleString(),
+                name: name,
+                items: selectedItems.join(', '),
+                subtotal: subtotal,
+                serviceFee: serviceFee,
+                total: total
+            };
+
+            if (!scriptUrl) {
+                alert(`[模擬送出成功]
+姓名：${name}
+已選品項：${payload.items}
+總計：$${total} (含預估服務費)
+
+若要真正寫入 Google 試算表，請在上方輸入框貼上 Google Apps Script 網址。`);
+                return;
+            }
+
+            // 發送至 Google Apps Script
+            fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert('訂單已成功送出並同步至 Google 試算表！');
+            })
+            .catch(err => {
+                alert('送出失敗，請檢查 Apps Script 網址與權限設定。');
+                console.error(err);
+            });
+        });
+    </script>
+</body>
+</html>
