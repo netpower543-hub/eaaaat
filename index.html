@@ -46,17 +46,28 @@
     }
     .store-name { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
     
+    .menu-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
     .menu-link-btn {
+      flex: 1;
       display: inline-block;
-      width: 100%;
-      padding: 10px;
+      padding: 8px 10px;
       background: var(--primary-light);
       color: var(--primary);
       text-decoration: none;
       font-weight: 700;
       font-size: 14px;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--primary);
+      text-align: center;
+    }
+    
+    .menu-link-btn:active {
+      background: var(--primary);
+      color: #FFF;
     }
 
     .content-section { padding: 16px; flex: 1; }
@@ -255,9 +266,14 @@
 <div class="mobile-container">
   <div class="header">
     <div class="store-name">BELLINI Pasta Pasta 線上點餐</div>
-    <a href="https://www.bellinipasta.com.tw/bellini-pasta/events?event_id=185" target="_blank" class="menu-link-btn">
-      📖 開啟官方圖片菜單對照
-    </a>
+    <div class="menu-btn-group">
+      <a href="https://www.bellinipasta.com.tw/bellini-pasta/events?event_id=185" target="_blank" class="menu-link-btn">
+        📖 套餐
+      </a>
+      <a href="https://www.bellinipasta.com.tw/bellini-pasta/events?event_id=66" target="_blank" class="menu-link-btn">
+        📖 菜單
+      </a>
+    </div>
   </div>
 
   <div class="content-section">
@@ -718,16 +734,19 @@
       price: item.price
     }));
 
+    const payload = {
+      userName: userName,
+      items: formattedItems,
+      totalAmount: total,
+      timestamp: new Date().toISOString()
+    };
+
+    // 使用 text/plain 可避免跨網域預檢問題，確保 GAS 順利接收
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userName: userName,
-        items: formattedItems,
-        totalAmount: total,
-        timestamp: new Date().toISOString()
-      })
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
     })
     .then(() => {
       alert('訂單已成功送出！');
@@ -736,7 +755,10 @@
       updateCartUI();
       closeCartModal();
     })
-    .catch(() => alert('送出失敗，請重試'));
+    .catch((err) => {
+      console.error(err);
+      alert('送出失敗，請重試');
+    });
   }
 
   filterMenu();
