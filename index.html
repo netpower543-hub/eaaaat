@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BELLINI Pasta Pasta 聚會點餐</title>
+  <title>BELLINI Pasta Pasta 線上點餐</title>
   <style>
     :root {
       --primary: #FF6B35;
@@ -60,7 +60,7 @@
     }
 
     .content-section { padding: 16px; flex: 1; }
-    .input-group { margin-bottom: 16px; }
+    .input-group { margin-bottom: 12px; }
     .input-label { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 6px; display: block; }
     .input-box {
       width: 100%;
@@ -69,6 +69,14 @@
       border-radius: 8px;
       font-size: 15px;
       outline: none;
+    }
+    .input-box:focus {
+      border-color: var(--primary);
+    }
+
+    .search-box {
+      background: var(--gray-bg);
+      border: 1px solid var(--border);
     }
 
     .category-title {
@@ -106,6 +114,13 @@
       white-space: nowrap;
     }
     .add-btn:active { background: var(--primary); color: #FFF; }
+
+    .no-result {
+      text-align: center;
+      color: var(--gray-text);
+      padding: 30px 0;
+      font-size: 14px;
+    }
 
     .cart-bar {
       position: fixed;
@@ -151,15 +166,21 @@
 <div class="mobile-container">
   <div class="header">
     <div class="store-name">BELLINI Pasta Pasta 線上點餐</div>
-    <a href="https://www.bellinipasta.com.tw/menu" target="_blank" class="menu-link-btn">
+    <a href="https://www.bellinipasta.com.tw/bellini-pasta/events?event_id=185" target="_blank" class="menu-link-btn">
       📖 開啟官方圖片菜單對照
     </a>
   </div>
 
   <div class="content-section">
     <div class="input-group">
-      <label class="input-label">請輸入您的姓名：</label>
+      <label class="input-label">訂購人姓名：</label>
       <input type="text" id="user-name" class="input-box" placeholder="例如：小明">
+    </div>
+
+    <!-- 關鍵字搜尋列 -->
+    <div class="input-group">
+      <label class="input-label">搜尋餐點：</label>
+      <input type="text" id="search-input" class="input-box search-box" placeholder="🔍 輸入關鍵字（如：牛排、燉飯、披薩）" oninput="filterMenu()">
     </div>
 
     <!-- 全品項菜單區 -->
@@ -178,91 +199,197 @@
 <script>
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw10CiiE_yatTCrTa_1yjiQRzlkIJCedkWhoEzhsDk3qIwgaUiuaotiCZsKYRxNpj88Rg/exec';
 
-  // 完整官方菜單資料
   const fullMenu = [
     {
-      category: "🥗 開胃菜 & 沙拉 (Appetizer & Salad)",
+      category: "SET MENU 雙人套餐",
       items: [
-        { name: "BELLINI 經典凱薩沙拉", price: 280 },
-        { name: "煙燻鮭魚鮮蔬沙拉", price: 320 },
-        { name: "香酥炸薯條", price: 160 },
-        { name: "蒜味拿坡里炸雞", price: 240 },
-        { name: "義式炒野菇", price: 220 },
-        { name: "香煎干貝鮮蝦佐塔塔醬", price: 360 }
+        { name: "雙人經典套餐", price: 1380 },
+        { name: "雙人主菜套餐 (人氣魔鬼風香料烤半雞)", price: 1580 },
+        { name: "雙人主菜套餐 (奶香白醬香煎鮭魚排)", price: 1680 },
+        { name: "雙人主菜套餐 (和風BBQ醬烤豬肋排)", price: 1680 },
+        { name: "雙人主菜套餐 (炭烤美國翼板牛排 300g)", price: 1780 },
+        { name: "雙人主菜套餐 (炭烤美國肋眼牛排 300g)", price: 1980 }
       ]
     },
     {
-      category: "🍕 拿坡里手工比薩 (Pizza)",
+      category: "BREAD & SOUP 麵包 & 湯品",
       items: [
-        { name: "瑪格麗特蕃茄起司比薩", price: 320 },
-        { name: "夏威夷鮮蝦鳳梨比薩", price: 380 },
-        { name: "羅勒青醬海鮮比薩", price: 420 },
-        { name: "四種起司蜂蜜比薩", price: 360 },
-        { name: "辣味培根薩拉米比薩", price: 380 },
-        { name: "特選雙拼比薩 (自選兩種)", price: 450 }
+        { name: "義式佛卡夏 (原味)", price: 100 },
+        { name: "義式佛卡夏 (蜂蜜茄丁)", price: 130 },
+        { name: "超人氣香蒜奶酥麵包", price: 140 },
+        { name: "義式番茄野菜培根湯", price: 130 },
+        { name: "奶油玉米湯", price: 130 },
+        { name: "主廚特選湯品", price: 130 }
       ]
     },
     {
-      category: "🍝 經典義大利麵 (Pasta)",
+      category: "SALAD 沙拉",
       items: [
-        { name: "經典波隆那肉醬起司麵", price: 320 },
-        { name: "東京風蒜辣牛蒡雞肉麵", price: 340 },
-        { name: "奶油培根蛋黃義大利麵", price: 320 },
-        { name: "羅勒青醬鮮蝦義大利麵", price: 380 },
-        { name: "香蒜白酒蛤蜊義大利麵", price: 340 },
-        { name: "總匯海鮮蕃茄義大利麵", price: 420 },
-        { name: "和風明太子鮮蝦義大利麵", price: 380 }
+        { name: "Bellini經典凱薩沙拉", price: 340 },
+        { name: "義式炭烤時蔬菜溫沙拉", price: 320 },
+        { name: "煙燻鮭魚鮮蔬和風沙拉", price: 360 },
+        { name: "煙燻鴨胸陳年黑醋沙拉", price: 360 }
       ]
     },
     {
-      category: "🥘 經典燉飯 & 主餐 (Risotto & Main)",
+      category: "APPETIZER 開胃菜",
+      items: [
+        { name: "馬德里香料燉牛肚", price: 300 },
+        { name: "蒜香辣炒野菇時蔬鮮蝦", price: 320 },
+        { name: "義式酒香炒野菇甘藍", price: 270 },
+        { name: "香酥唐揚雞翅佐辣茄汁", price: 280 },
+        { name: "凱薩風香辣酥炸軟絲", price: 320 },
+        { name: "酥炸薯條佐松露醬", price: 200 },
+        { name: "鄉村辣味牛肉醬口袋餅", price: 280 },
+        { name: "和風照燒烤雞腿鮮蔬", price: 300 }
+      ]
+    },
+    {
+      category: "PASTA 義大利麵",
+      items: [
+        { name: "經典波隆那肉醬溫泉蛋起司麵", price: 280 },
+        { name: "東京風蒜辣牛蒡雞肉麵", price: 300 },
+        { name: "香辣完熟番茄鮮蝦麵", price: 340 },
+        { name: "BBQ豬肋排培根番茄麵", price: 350 },
+        { name: "和風柚子軟絲明太子麵", price: 300 },
+        { name: "漁夫風綜合海鮮番茄麵", price: 380 },
+        { name: "羅勒鮮蝦野菇奶油起司麵", price: 320 },
+        { name: "職人風奶油蛋黃培根麵", price: 280 },
+        { name: "燻鮭野菇曙光醬起司麵", price: 320 },
+        { name: "義式家鄉番茄蔬食麵", price: 280 },
+        { name: "茄丁軟絲圈墨魚汁麵", price: 340 },
+        { name: "焗烤肉醬千層麵", price: 380 },
+        { name: "蔥香蒜味淡菜蛤蜊麵", price: 300 }
+      ]
+    },
+    {
+      category: "PIZZA 比薩",
+      items: [
+        { name: "瑪格麗特香茄起司比薩", price: 360 },
+        { name: "風乾火腿主廚總匯比薩", price: 450 },
+        { name: "BBQ醬雞肉鳳梨起司比薩", price: 400 },
+        { name: "明太子軟絲鮪魚起司比薩", price: 400 },
+        { name: "羅勒青醬鮮蝦野菇起司比薩", price: 420 },
+        { name: "綜合華菇黑松露起司比薩", price: 420 },
+        { name: "經典四種起司比薩", price: 380 },
+        { name: "香烤牛肉蒜辣起司比薩", price: 470 },
+        { name: "特選雙拼比薩", price: 440 },
+        { name: "卡布奇諾咖啡起司比薩 (甜點)", price: 260 }
+      ]
+    },
+    {
+      category: "RISOTTO 燉飯",
       items: [
         { name: "照燒醬烤雞野菇起司燉飯", price: 360 },
-        { name: "威尼斯墨魚汁海鮮燉飯", price: 420 },
-        { name: "牛肝菌野菇起司燉飯", price: 380 },
-        { name: "美式頂級肋眼牛排 10oz", price: 980 },
-        { name: "義式香草烤半雞", price: 680 }
+        { name: "義式豐盛海鮮番茄起司燉飯", price: 380 }
       ]
     },
     {
-      category: "🍰 甜點 & 飲品 (Dessert & Drink)",
+      category: "MAIN COURSE 主菜",
       items: [
-        { name: "主廚特製提拉米蘇", price: 160 },
-        { name: "義式焦糖烤布蕾", price: 140 },
-        { name: "特選冰紅茶 / 熱紅茶", price: 90 },
-        { name: "美式咖啡 / 拿鐵", price: 110 },
-        { name: "鮮榨柳橙汁", price: 130 },
-        { name: "氣泡水 / 礦泉水", price: 80 }
+        { name: "炭烤美國翼板牛排 (300g)", price: 850 },
+        { name: "人氣魔鬼風香料烤半雞", price: 650 },
+        { name: "和風BBQ醬烤豬肋排", price: 750 },
+        { name: "奶香白醬香煎鮭魚排", price: 750 },
+        { name: "炭烤美國肋眼牛排 (300g)", price: 1050 }
+      ]
+    },
+    {
+      category: "DESSERT 甜點",
+      items: [
+        { name: "超人氣自製提拉米蘇", price: 320 },
+        { name: "義式皇家奶酪聖帽子", price: 200 },
+        { name: "糖漬栗子泡芙塔", price: 180 },
+        { name: "香草慕斯蘋果塔", price: 180 },
+        { name: "義式經典香濃巧克力", price: 220 },
+        { name: "紐約風乳酪蛋糕", price: 180 }
+      ]
+    },
+    {
+      category: "BEVERAGE 飲品 & 無酒精特調",
+      items: [
+        { name: "奇異果香蕉優格果昔", price: 160 },
+        { name: "草莓野莓果優格果昔", price: 200 },
+        { name: "鳳梨白桃優格果昔", price: 180 },
+        { name: "義大利咖啡 (冰/熱)", price: 120 },
+        { name: "義大利濃縮咖啡 (Single)", price: 120 },
+        { name: "義大利濃縮咖啡 (Double)", price: 130 },
+        { name: "拿鐵咖啡 (冰/熱)", price: 150 },
+        { name: "焦糖瑪奇朵 (冰/熱)", price: 150 },
+        { name: "可樂 / 雪碧 / 零卡可樂", price: 80 },
+        { name: "可爾必思 / 可爾必思蘇打", price: 80 },
+        { name: "100%新鮮繽紛檸檬漾", price: 120 },
+        { name: "覆盆子玫瑰烏龍茶 (熱)", price: 100 },
+        { name: "皇家宮廷伯爵茶 (熱)", price: 100 },
+        { name: "悠活舒緩茶 (熱/無咖啡因)", price: 100 },
+        { name: "檸檬鮮活冰綠茶", price: 120 },
+        { name: "熱帶鮮果冰紅茶", price: 120 },
+        { name: "黑糖鮮奶冰茶", price: 150 },
+        { name: "莫西多奇異興蘇打 (無酒精)", price: 220 },
+        { name: "野莓果薑汁惡魔 (無酒精)", price: 180 },
+        { name: "白桃迷迭瑪格麗特 (無酒精)", price: 200 }
+      ]
+    },
+    {
+      category: "ALCOHOL 啤酒 & 葡萄酒",
+      items: [
+        { name: "台灣金牌啤酒 330ml", price: 130 },
+        { name: "朝日啤酒 330ml", price: 130 },
+        { name: "義大利莫雷帝啤酒 330ml", price: 130 },
+        { name: "Gancia Asti 氣泡酒 (375ml)", price: 550 },
+        { name: "Gancia Asti 氣泡酒 (750ml)", price: 980 },
+        { name: "Estrella Frizzante (杯)", price: 150 },
+        { name: "Estrella Frizzante (750ml)", price: 680 },
+        { name: "Montes Classic Chardonnay (750ml)", price: 980 },
+        { name: "Templum Tempranillo (杯)", price: 150 },
+        { name: "Templum Tempranillo (750ml)", price: 680 },
+        { name: "Piccini Memoro (375ml)", price: 550 },
+        { name: "Piccini Memoro (750ml)", price: 980 }
       ]
     }
   ];
 
   let cart = [];
 
-  // 渲染菜單列表
-  function renderMenuList() {
+  // 渲染菜單列表（支援關鍵字過濾）
+  function filterMenu() {
+    const keyword = document.getElementById('search-input').value.trim().toLowerCase();
     const container = document.getElementById('menu-list');
     container.innerHTML = '';
 
-    fullMenu.forEach(cat => {
-      const title = document.createElement('div');
-      title.className = 'category-title';
-      title.innerText = cat.category;
-      container.appendChild(title);
+    let hasResult = false;
 
-      cat.items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'food-card';
-        card.innerHTML = `
-          <div class="food-info">
-            <div class="food-name">${item.name}</div>
-            <div class="food-price">$${item.price}</div>
-          </div>
-          <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
-        `;
-        container.appendChild(card);
-      });
+    fullMenu.forEach(cat => {
+      // 篩選出符合關鍵字的餐點
+      const matchedItems = cat.items.filter(item => 
+        item.name.toLowerCase().includes(keyword)
+      );
+
+      if (matchedItems.length > 0) {
+        hasResult = true;
+        const title = document.createElement('div');
+        title.className = 'category-title';
+        title.innerText = cat.category;
+        container.appendChild(title);
+
+        matchedItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'food-card';
+          card.innerHTML = `
+            <div class="food-info">
+              <div class="food-name">${item.name}</div>
+              <div class="food-price">$${item.price}</div>
+            </div>
+            <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
+          `;
+          container.appendChild(card);
+        });
+      }
     });
+
+    if (!hasResult) {
+      container.innerHTML = `<div class="no-result">找不到符合「${keyword}」的餐點</div>`;
+    }
   }
 
   function addToCart(name, price) {
@@ -279,7 +406,7 @@
   function submitOrder() {
     const userName = document.getElementById('user-name').value.trim();
     if (!userName) {
-      alert('請先輸入您的姓名！');
+      alert('請先輸入訂購人姓名！');
       return;
     }
     if (cart.length === 0) {
@@ -310,7 +437,7 @@
   }
 
   // 初始化菜單
-  renderMenuList();
+  filterMenu();
 </script>
 
 </body>
