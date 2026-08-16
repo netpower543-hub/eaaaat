@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>線上點餐機</title>
+  <title>線上點餐</title>
   <style>
     :root {
       --primary: #FF6B35;
@@ -15,7 +15,7 @@
       --radius: 16px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
     body {
       background-color: #EFEFEF;
@@ -24,7 +24,6 @@
       min-height: 100vh;
     }
 
-    /* 手機容器 */
     .mobile-container {
       width: 100%;
       max-width: 480px;
@@ -33,122 +32,47 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
       padding-bottom: 90px;
     }
 
-    /* 頂部 Header */
     .header {
-      padding: 20px 16px 12px;
+      padding: 16px;
       background: #FFFFFF;
       position: sticky;
       top: 0;
       z-index: 100;
       border-bottom: 1px solid var(--border);
+      text-align: center;
     }
-    .store-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .store-name { font-size: 20px; font-weight: 700; color: var(--dark); }
-    .store-status { font-size: 12px; background: #E6F4EA; color: #137333; padding: 4px 8px; border-radius: 20px; font-weight: 600; }
-    
-    /* 優惠 Banner */
-    .promo-banner {
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .store-name { font-size: 18px; font-weight: 700; color: var(--dark); }
 
-    /* 分類導覽 Bar */
-    .category-bar {
-      display: flex;
-      gap: 8px;
-      padding: 12px 16px;
-      overflow-x: auto;
-      background: #FFFFFF;
-      border-bottom: 1px solid var(--border);
-      scrollbar-width: none;
-    }
-    .category-bar::-webkit-scrollbar { display: none; }
-    .cat-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: #FFF;
-      color: var(--gray-text);
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .cat-btn.active {
-      background: var(--primary);
-      color: #FFF;
-      border-color: var(--primary);
-    }
-
-    /* 餐點列表 */
-    .menu-section { padding: 16px; }
-    .section-title { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 12px; }
+    .menu-section { padding: 16px; flex: 1; }
+    .loading-text { text-align: center; color: var(--gray-text); margin-top: 40px; font-size: 15px; }
 
     .food-card {
       display: flex;
-      gap: 12px;
-      padding: 12px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
       margin-bottom: 12px;
       background: #FFF;
-      cursor: pointer;
-      transition: transform 0.1s;
     }
-    .food-card:active { transform: scale(0.98); }
-    .food-img {
-      width: 88px;
-      height: 88px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: var(--gray-bg);
-    }
-    .food-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .food-name { font-size: 15px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
-    .food-desc { font-size: 12px; color: var(--gray-text); line-height: 1.3; margin-bottom: 8px; }
-    .food-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .food-price { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .food-name { font-size: 16px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+    .food-price { font-size: 15px; font-weight: 700; color: var(--primary); }
+    
     .add-btn {
-      background: var(--primary-light);
-      color: var(--primary);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      background: var(--primary);
+      color: #FFF;
       border: none;
-      font-size: 18px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
     }
 
-    /* 懸浮購物車 Bar */
     .cart-bar {
       position: fixed;
       bottom: 16px;
@@ -191,90 +115,52 @@
 <body>
 
 <div class="mobile-container">
-  <!-- 頂部資訊 -->
   <div class="header">
-    <div class="store-info">
-      <div class="store-name">美味手作坊 🍔</div>
-      <div class="store-status">接單中</div>
-    </div>
-    <div class="promo-banner">
-      🎉 全店滿 $300 折 $30 | 支持線上支付與到店付款
-    </div>
+    <div class="store-name">線上點餐</div>
   </div>
 
-  <!-- 分類導覽列 -->
-  <div class="category-bar">
-    <button class="cat-btn active">🔥 熱銷推薦</button>
-    <button class="cat-btn">主餐系列</button>
-    <button class="cat-btn">點心炸物</button>
-    <button class="cat-btn">特調飲料</button>
+  <div class="menu-section" id="menu-container">
+    <div class="loading-text">載入菜單中...</div>
   </div>
 
-  <!-- 餐點列表區 -->
-  <div class="menu-section">
-    <div class="section-title">熱銷推薦</div>
-
-    <!-- 餐點 1 -->
-    <div class="food-card" onclick="addToCart('招牌牛肉起司堡', 140)">
-      <img class="food-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop" alt="漢堡">
-      <div class="food-details">
-        <div>
-          <div class="food-name">招牌牛肉起司堡</div>
-          <div class="food-desc">100% 純牛肉漢堡排搭配切達起司與秘製醬汁</div>
-        </div>
-        <div class="food-bottom">
-          <div class="food-price">$140</div>
-          <button class="add-btn">+</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 餐點 2 -->
-    <div class="food-card" onclick="addToCart('錫蘭鮮奶茶', 55)">
-      <img class="food-img" src="https://images.unsplash.com/photo-1576107232684-1279f3908594?w=300&auto=format&fit=crop" alt="鮮奶茶">
-      <div class="food-details">
-        <div>
-          <div class="food-name">錫蘭鮮奶茶</div>
-          <div class="food-desc">濃郁錫蘭紅茶配上純鮮奶，香醇滑順</div>
-        </div>
-        <div class="food-bottom">
-          <div class="food-price">$55</div>
-          <button class="add-btn">+</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 餐點 3 -->
-    <div class="food-card" onclick="addToCart('美式黃金脆薯', 45)">
-      <img class="food-img" src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&auto=format&fit=crop" alt="薯條">
-      <div class="food-details">
-        <div>
-          <div class="food-name">美式黃金脆薯</div>
-          <div class="food-desc">外酥內軟，附上經典蕃茄醬</div>
-        </div>
-        <div class="food-bottom">
-          <div class="food-price">$45</div>
-          <button class="add-btn">+</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 底部懸浮購物車 -->
   <div class="cart-bar">
     <div class="cart-info">
       <span class="cart-badge" id="cart-count">0 項</span>
       <span class="cart-total" id="cart-total">小計 $0</span>
     </div>
-    <button class="checkout-btn" onclick="submitOrder()">去結帳 →</button>
+    <button class="checkout-btn" onclick="submitOrder()">送出訂單</button>
   </div>
 </div>
 
 <script>
-  // Google Apps Script 後端 URL
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw10CiiE_yatTCrTa_1yjiQRzlkIJCedkWhoEzhsDk3qIwgaUiuaotiCZsKYRxNpj88Rg/exec';
-
   let cart = [];
+
+  // 自動從你的 Google Apps Script 載入菜單
+  fetch(SCRIPT_URL)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
+      
+      // 假設你的 API 回傳 array: [{name: "品項", price: 100}, ...]
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'food-card';
+        card.innerHTML = `
+          <div>
+            <div class="food-name">${item.name}</div>
+            <div class="food-price">$${item.price}</div>
+          </div>
+          <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+ 加點</button>
+        `;
+        container.appendChild(card);
+      });
+    })
+    .catch(err => {
+      // 若後端僅支援 POST，顯示點餐提示
+      document.getElementById('menu-container').innerHTML = '<div class="loading-text">請選擇餐點進行結帳</div>';
+    });
 
   function addToCart(name, price) {
     cart.push({ name, price });
@@ -289,35 +175,24 @@
 
   function submitOrder() {
     if (cart.length === 0) {
-      alert('請先選擇餐點再進行結帳！');
+      alert('請先選擇餐點！');
       return;
     }
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    const orderData = {
-      items: cart,
-      totalAmount: total,
-      timestamp: new Date().toISOString()
-    };
-
-    // 發送訂單至 Google Apps Script
+    
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: cart, totalAmount: total, timestamp: new Date().toISOString() })
     })
     .then(() => {
-      alert('訂單已成功送出！感謝您的點餐。');
+      alert('訂單已送出！');
       cart = [];
       updateCartUI();
     })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('送出訂單時發生錯誤，請重試。');
-    });
+    .catch(() => alert('送出失敗，請重試'));
   }
 </script>
 
