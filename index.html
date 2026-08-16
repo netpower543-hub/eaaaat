@@ -36,7 +36,7 @@
     }
 
     .header {
-      padding: 16px;
+      padding: 16px 16px 8px;
       background: #FFFFFF;
       position: sticky;
       top: 0;
@@ -49,6 +49,7 @@
     .menu-btn-group {
       display: flex;
       gap: 8px;
+      margin-bottom: 8px;
     }
 
     .menu-link-btn {
@@ -70,6 +71,33 @@
       color: #FFF;
     }
 
+    /* 類別頁籤 (Tabs) */
+    .category-tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .category-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      white-space: nowrap;
+      padding: 6px 14px;
+      background: var(--gray-bg);
+      color: var(--gray-text);
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .tab-item.active {
+      background: var(--primary);
+      color: #FFF;
+      border-color: var(--primary);
+    }
+
     .content-section { padding: 16px; flex: 1; }
     .input-group { margin-bottom: 12px; }
     .input-label { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 6px; display: block; }
@@ -88,7 +116,7 @@
       font-size: 16px;
       font-weight: 700;
       color: var(--primary);
-      margin: 20px 0 10px;
+      margin: 10px 0 10px;
       padding-bottom: 4px;
       border-bottom: 2px solid var(--primary-light);
     }
@@ -274,6 +302,9 @@
         📖 菜單
       </a>
     </div>
+
+    <!-- 類別頁籤分頁 -->
+    <div class="category-tabs" id="category-tabs"></div>
   </div>
 
   <div class="content-section">
@@ -496,12 +527,33 @@
     appetizer: ["馬德里香料燉牛肚", "蒜香辣炒野菇時蔬鮮蝦", "義式酒香炒野菇甘藍", "香酥唐揚雞翅佐辣茄汁", "凱薩風香辣酥炸軟絲", "酥炸薯條佐松露醬", "鄉村辣味牛肉醬口袋餅", "和風照燒烤雞腿鮮蔬"],
     pizza: ["瑪格麗特香茄起司比薩", "風乾火腿主廚總匯比薩", "BBQ醬雞肉鳳梨起司比薩", "明太子軟絲鮪魚起司比薩", "羅勒青醬鮮蝦野菇起司比薩", "綜合華菇黑松露起司比薩", "經典四種起司比薩", "香烤牛肉蒜辣起司比薩", "特選雙拼比薩"],
     pasta: ["經典波隆那肉醬溫泉蛋起司麵", "東京風蒜辣牛蒡雞肉麵", "香辣完熟番茄鮮蝦麵", "BBQ豬肋排培根番茄麵", "和風柚子軟絲明太子麵", "漁夫風綜合海鮮番茄麵", "羅勒鮮蝦野菇奶油起司麵", "職人風奶油蛋黃培根麵", "燻鮭野菇曙光醬起司麵", "義式家鄉番茄蔬食麵", "茄丁軟絲圈墨魚汁麵", "焗烤肉醬千層麵", "蔥香蒜味淡菜蛤蜊麵"],
-    beverage: ["義大利咖啡 (冰)", "義大利咖啡 (熱)", "拿鐵咖啡 (冰)", "拿鐵咖啡 (熱)", "焦糖瑪奇朵 (冰)", "焦糖瑪奇朵 (熱)", "可樂", "雪碧", "零卡可樂", "可爾必思", "100%新鮮繽紛檸檬漾", "覆盆子玫瑰烏龍茶 (熱)", "皇家宮廷伯爵茶 (熱)", "悠活舒緩茶 (熱)", "檸檬鮮活冰綠茶", "熱帶鮮果冰紅茶", "黑糖鮮奶冰茶"]
+    beverage: ["義大利咖啡", "拿鐵咖啡", "焦糖瑪奇朵", "可樂 / 雪碧 / 零卡可樂", "可爾必思", "100%新鮮繽紛檸檬漾", "覆盆子玫瑰烏龍茶", "皇家宮廷伯爵茶", "悠活舒緩茶", "檸檬鮮活冰綠茶", "熱帶鮮果冰紅茶", "黑糖鮮奶冰茶"]
   };
 
+  let activeCategory = "全部";
   let cart = [];
   let currentEditingSet = null;
   let currentEditingBev = null;
+
+  // 初始化類別頁籤
+  function initTabs() {
+    const tabsContainer = document.getElementById('category-tabs');
+    tabsContainer.innerHTML = '';
+
+    const categories = ["全部", ...fullMenu.map(c => c.category.split(' ')[0])];
+
+    categories.forEach(cat => {
+      const tab = document.createElement('div');
+      tab.className = `tab-item ${cat === activeCategory ? 'active' : ''}`;
+      tab.innerText = cat;
+      tab.onclick = () => {
+        activeCategory = cat;
+        initTabs();
+        filterMenu();
+      };
+      tabsContainer.appendChild(tab);
+    });
+  }
 
   function filterMenu() {
     const keyword = document.getElementById('search-input').value.trim().toLowerCase();
@@ -511,6 +563,11 @@
     let hasResult = false;
 
     fullMenu.forEach(cat => {
+      const catShortName = cat.category.split(' ')[0];
+      if (activeCategory !== "全部" && activeCategory !== catShortName) {
+        return;
+      }
+
       const matchedItems = cat.items.filter(item => 
         item.name.toLowerCase().includes(keyword)
       );
@@ -614,6 +671,23 @@
       return html;
     };
 
+    const buildBevInputs = (label, idPrefix) => {
+      let html = `<div class="option-group">
+        <div class="option-title">${label}</div>
+        <select id="${idPrefix}-name" class="option-select">`;
+      setOptionsList.beverage.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+      html += `</select>
+        <div class="radio-group" style="margin-top:8px;">
+          <input type="radio" name="${idPrefix}-temp" id="${idPrefix}-ice" value="冰" class="radio-input" checked>
+          <label for="${idPrefix}-ice" class="radio-label">🧊 冰</label>
+          <input type="radio" name="${idPrefix}-temp" id="${idPrefix}-hot" value="熱" class="radio-input">
+          <label for="${idPrefix}-hot" class="radio-label">🔥 熱</label>
+        </div>
+        <input type="text" id="${idPrefix}-note" class="input-box" style="margin-top:8px;" placeholder="備註（如：去冰、微糖，選填）">
+      </div>`;
+      return html;
+    };
+
     let formHTML = '';
     formHTML += buildSelect('1. 沙拉 (任選 1)', 'set-salad', setOptionsList.salad);
     formHTML += buildSelect('2. 開胃菜 ($300內任選 1)', 'set-appetizer', setOptionsList.appetizer);
@@ -623,8 +697,10 @@
     }
 
     formHTML += buildSelect(setType === 'classic' ? '4. 義大利麵 ($300內任選 1)' : '3. 義大利麵 ($300內任選 1)', 'set-pasta', setOptionsList.pasta);
-    formHTML += buildSelect('飲料 1 ($120內任選 1)', 'set-bev1', setOptionsList.beverage);
-    formHTML += buildSelect('飲料 2 ($120內任選 1)', 'set-bev2', setOptionsList.beverage);
+    
+    // 套餐內飲料統一採用「品項 + 冰熱 + 備註」
+    formHTML += buildBevInputs('飲料 1 ($120內任選 1)', 'set-bev1');
+    formHTML += buildBevInputs('飲料 2 ($120內任選 1)', 'set-bev2');
 
     body.innerHTML = formHTML;
     document.getElementById('set-modal').classList.add('active');
@@ -638,8 +714,16 @@
     const salad = document.getElementById('set-salad').value;
     const appetizer = document.getElementById('set-appetizer').value;
     const pasta = document.getElementById('set-pasta').value;
-    const bev1 = document.getElementById('set-bev1').value;
-    const bev2 = document.getElementById('set-bev2').value;
+
+    const parseBev = (idPrefix) => {
+      const name = document.getElementById(`${idPrefix}-name`).value;
+      const temp = document.querySelector(`input[name="${idPrefix}-temp"]:checked`).value;
+      const note = document.getElementById(`${idPrefix}-note`).value.trim();
+      return `${name} (${temp}${note ? ' | ' + note : ''})`;
+    };
+
+    const bev1Str = parseBev('set-bev1');
+    const bev2Str = parseBev('set-bev2');
 
     let subItems = [`沙拉: ${salad}`, `開胃菜: ${appetizer}`];
     
@@ -648,7 +732,7 @@
       subItems.push(`披薩: ${pizza}`);
     }
     
-    subItems.push(`義大利麵: ${pasta}`, `飲料: ${bev1}, ${bev2}`);
+    subItems.push(`義大利麵: ${pasta}`, `飲料: ${bev1Str}, ${bev2Str}`);
 
     cart.push({
       id: Date.now(),
@@ -741,7 +825,6 @@
       timestamp: new Date().toISOString()
     };
 
-    // 使用 text/plain 可避免跨網域預檢問題，確保 GAS 順利接收
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -761,6 +844,7 @@
     });
   }
 
+  initTabs();
   filterMenu();
 </script>
 
